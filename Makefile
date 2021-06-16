@@ -23,7 +23,7 @@ googletest:
 	if [ ! -d third_party/googletest ]; then git clone https://github.com/google/googletest third_party/googletest && cd third_party/googletest && git checkout release-1.10.0; fi
 
 googletest_bundle: googletest
-	if [ ! -d third_party/googletest_bundle ]; then third_party/googletest/googlemock/scripts/fuse_gmock_files.py third_party/googletest_bundle; fi
+	if [ ! -d third_party/googletest_bundle ]; then python2.7 third_party/googletest/googlemock/scripts/fuse_gmock_files.py third_party/googletest_bundle; fi
 
 deps: folder boringssl curl json googletest_bundle djinni
 	go version || if [ $$? -ne 0 ]; then >&2 echo "Warning: Go is not installed"; fi
