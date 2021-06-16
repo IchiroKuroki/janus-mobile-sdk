@@ -97,7 +97,7 @@ endif()
 # End Android SDK library
 
 # Test lib
-if(NOT WITHOUT_TESTS)
+if(WITHOUT_TESTS EQUAL "false")
   set(CMAKE_BUILD_TYPE Debug)
 
   file(GLOB_RECURSE test_srcs ${ROOT}/test/*.cc)
