@@ -138,6 +138,7 @@ platform = interface +c {
 janus_conf = interface +j +o +c {
   url(): string;
   plugin(): string;
+  token(): string;
 }
 
 janus_error = record {

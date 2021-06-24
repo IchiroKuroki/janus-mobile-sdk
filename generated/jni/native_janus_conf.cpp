@@ -30,6 +30,14 @@ std::string NativeJanusConf::JavaProxy::plugin() {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::String::toCpp(jniEnv, jret);
 }
+std::string NativeJanusConf::JavaProxy::token() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeJanusConf>::get();
+    auto jret = (jstring)jniEnv->CallObjectMethod(Handle::get().get(), data.method_token);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::String::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_com_github_helloiampau_janus_generated_JanusConf_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -55,6 +63,16 @@ CJNIEXPORT jstring JNICALL Java_com_github_helloiampau_janus_generated_JanusConf
         DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
         const auto& ref = ::djinni::objectFromHandleAddress<::Janus::JanusConf>(nativeRef);
         auto r = ref->plugin();
+        return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jstring JNICALL Java_com_github_helloiampau_janus_generated_JanusConf_00024CppProxy_native_1token(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        DJINNI_FUNCTION_PROLOGUE1(jniEnv, nativeRef);
+        const auto& ref = ::djinni::objectFromHandleAddress<::Janus::JanusConf>(nativeRef);
+        auto r = ref->token();
         return ::djinni::release(::djinni::String::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

@@ -35,6 +35,7 @@ private:
 
         std::string url() override;
         std::string plugin() override;
+        std::string token() override;
 
     private:
         friend ::djinni::JniInterface<::Janus::JanusConf, ::djinni_generated::NativeJanusConf>;
@@ -43,6 +44,7 @@ private:
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("com/github/helloiampau/janus/generated/JanusConf") };
     const jmethodID method_url { ::djinni::jniGetMethodID(clazz.get(), "url", "()Ljava/lang/String;") };
     const jmethodID method_plugin { ::djinni::jniGetMethodID(clazz.get(), "plugin", "()Ljava/lang/String;") };
+    const jmethodID method_token { ::djinni::jniGetMethodID(clazz.get(), "token", "()Ljava/lang/String;") };
 };
 
 }  // namespace djinni_generated

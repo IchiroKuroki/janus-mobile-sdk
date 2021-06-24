@@ -75,6 +75,7 @@ namespace Janus {
       std::shared_ptr<Transport> _transport;
       std::shared_ptr<Random> _random;
       std::shared_ptr<ProtocolDelegate> _delegate;
+      std::string _token;
 
       std::mutex _readyStateMutex;
       ReadyState _readyState = ReadyState::CLOSED;

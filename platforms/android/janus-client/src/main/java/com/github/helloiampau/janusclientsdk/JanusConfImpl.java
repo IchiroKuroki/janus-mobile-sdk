@@ -25,4 +25,14 @@ public class JanusConfImpl extends JanusConf {
     this._plugin = plugin;
   }
 
+  private String _token = "";
+
+  @Override
+  public String token() {
+    return this._token;
+  }
+  
+  public void token(String token) {
+   this._token = token;
+  }
 }

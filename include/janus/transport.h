@@ -36,7 +36,7 @@ namespace Janus {
 
   class Transport {
     public:
-      virtual void sessionId(const std::string& id) = 0;
+      virtual void sessionId(const std::string& id, const std::string& token) = 0;
       virtual void close() = 0;
 
       virtual TransportType type() = 0;
@@ -46,7 +46,7 @@ namespace Janus {
   class TransportImpl : public Transport {
     public:
       TransportImpl(const std::shared_ptr<TransportDelegate>& delegate, const std::shared_ptr<Async>& async);
-      void sessionId(const std::string& id);
+      void sessionId(const std::string& id, const std::string& token);
       void close();
 
     protected:
@@ -55,6 +55,7 @@ namespace Janus {
       std::shared_ptr<TransportDelegate> _delegate;
 
       std::string _sessionId = "";
+      std::string _token = "";
       std::mutex _sessionIdMutex;
 
       std::shared_ptr<Async> _async;
@@ -69,7 +70,7 @@ namespace Janus {
       }
 
       void send(const nlohmann::json& message, const std::shared_ptr<Bundle>& context);
-      void sessionId(const std::string& id);
+      void sessionId(const std::string& id, const std::string& token);
     private:
       void _sendAsync(const HttpTask& kernel, const std::shared_ptr<Bundle>& context);
 

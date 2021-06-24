@@ -10,4 +10,6 @@
 
 - (nonnull NSString *)plugin;
 
+- (nonnull NSString *)token;
+
 @end

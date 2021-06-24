@@ -10,6 +10,8 @@ public abstract class JanusConf {
 
     public abstract String plugin();
 
+    public abstract String token();
+
     private static final class CppProxy extends JanusConf
     {
         private final long nativeRef;
@@ -48,5 +50,13 @@ public abstract class JanusConf {
             return native_plugin(this.nativeRef);
         }
         private native String native_plugin(long _nativeRef);
+
+        @Override
+        public String token()
+        {
+            assert !this.destroyed.get() : "trying to use a destroyed object";
+            return native_token(this.nativeRef);
+        }
+        private native String native_token(long _nativeRef);
     }
 }

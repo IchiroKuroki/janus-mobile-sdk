@@ -13,9 +13,10 @@ namespace Janus {
     this->_status = TransportStatus::ON;
   }
 
-  void TransportImpl::sessionId(const std::string& id) {
+  void TransportImpl::sessionId(const std::string& id, const std::string& token) {
     std::lock_guard<std::mutex> lock(this->_sessionIdMutex);
     this->_sessionId = id;
+    this->_token = token;
   }
 
   void TransportImpl::close() {
@@ -40,8 +41,8 @@ namespace Janus {
     this->_sendAsync(task, context);
   }
 
-  void HttpTransport::sessionId(const std::string& id) {
-    TransportImpl::sessionId(id);
+  void HttpTransport::sessionId(const std::string& id, const std::string& token) {
+    TransportImpl::sessionId(id, token);
 
     auto context = Bundle::create();
     this->_sendAsync(HttpTransport::_loop, context);
@@ -74,6 +75,8 @@ namespace Janus {
         std::lock_guard<std::mutex> sessionIdLock(this->_sessionIdMutex);
         if(this->_sessionId.empty() == false) {
           path = path + this->_sessionId;
+          if(!TransportImpl::_token.empty())
+            path += "?token=" + TransportImpl::_token;
         }
       }
 
@@ -82,8 +85,10 @@ namespace Janus {
       }
 
       auto reply = kernel(path, client, this->shared_from_this());
-      auto content = nlohmann::json::parse(reply->body());
-      this->_delegate->onMessage(content, context);
+      if(!reply->body().empty()) {
+        auto content = nlohmann::json::parse(reply->body());
+        this->_delegate->onMessage(content, context);
+      }
 
       notEmptyLock.lock();
       this->_clients.push(client);

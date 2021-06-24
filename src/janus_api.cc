@@ -82,6 +82,7 @@ namespace Janus {
   void JanusApi::init(const std::shared_ptr<JanusConf>& conf, const std::shared_ptr<Platform>& platform, const std::shared_ptr<ProtocolDelegate>& delegate) {
     this->readyState(ReadyState::INIT);
 
+    this->_token = conf->token();
     this->_transport = this->_transportFactory->create(conf->url(), this->shared_from_this());
     this->_delegate = delegate;
     this->_platform = std::static_pointer_cast<PlatformImpl>(platform);
@@ -96,48 +97,31 @@ namespace Janus {
     auto transaction = this->_random->generate();
     auto handleId = this->handleId(payload);
 
+    nlohmann::json msg;
+
     if(command == JanusCommands::CREATE) {
-      auto msg = Messages::create(transaction);
-      this->_transport->send(msg, payload);
-
-      return;
-    }
-
-    if(command == JanusCommands::ATTACH) {
+      msg = Messages::create(transaction);
+    } else if(command == JanusCommands::ATTACH) {
       auto plugin = payload->getString("plugin", "");
-      this->_transport->send(Messages::attach(transaction, plugin), payload);
-
-      return;
-    }
-
-    if(command == JanusCommands::DESTROY) {
-      this->_transport->send(Messages::destroy(transaction), payload);
-
-      return;
-    }
-
-    if(command == JanusCommands::HANGUP) {
-      this->_transport->send(Messages::hangup(transaction, handleId), payload);
-
-      return;
-    }
-
-    if(command == JanusCommands::TRICKLE) {
+      msg = Messages::attach(transaction, plugin);
+    } else if(command == JanusCommands::DESTROY) {
+      msg = Messages::destroy(transaction);
+    } else if(command == JanusCommands::HANGUP) {
+      msg = Messages::hangup(transaction, handleId);
+    } else if(command == JanusCommands::TRICKLE) {
       auto sdpMid = payload->getString("sdpMid", "");
       auto sdpMLineIndex = payload->getInt("sdpMLineIndex", -1);
       auto candidate = payload->getString("candidate", "");
 
-      auto msg = Messages::trickle(transaction, handleId, sdpMid, sdpMLineIndex, candidate);
-      this->_transport->send(msg, payload);
-
-      return;
+      msg = Messages::trickle(transaction, handleId, sdpMid, sdpMLineIndex, candidate);
+    } else if(command == JanusCommands::TRICKLE_COMPLETED) {
+      msg = Messages::trickleCompleted(transaction, handleId);
     }
 
-    if(command == JanusCommands::TRICKLE_COMPLETED) {
-      auto msg = Messages::trickleCompleted(transaction, handleId);
-      this->_transport->send(msg, payload);
-
-      return;
+    if(!msg.empty()) {
+        if(!this->_token.empty()) msg["token"] = this->_token;
+        this->_transport->send(msg, payload);
+        return;
     }
 
     if(this->_plugin != nullptr) {
@@ -179,7 +163,7 @@ namespace Janus {
     if(header == "success" && context->getString("command", "") == JanusCommands::CREATE) {
       auto id = message.value("data", nlohmann::json::object()).value("id", (int64_t) 0);
       auto idAsString = std::to_string(id);
-      this->_transport->sessionId(idAsString);
+      this->_transport->sessionId(idAsString, this->_token);
       this->dispatch(JanusCommands::ATTACH, context);
 
       return;
@@ -287,6 +271,7 @@ namespace Janus {
     auto handleId = this->handleId(context);
 
     auto message = Messages::message(transaction, handleId, body);
+    if(!this->_token.empty()) message["token"] = this->_token;
     this->_transport->send(message, context);
   }
 
